@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>UNIPA Sync Settings</title>
+  <style>
+    body { width: 320px; padding: 16px; font-family: sans-serif; }
+    h2 { font-size: 16px; margin-top: 0; color: #1a73e8; }
+    label { font-size: 12px; font-weight: bold; display: block; margin-top: 12px; }
+    input[type="text"] { width: 100%; box-sizing: border-box; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; }
+    .reminder-item { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .reminder-item input[type="number"] { width: 50px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+    .reminder-item input[type="time"] { width: 90px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+    .btn-remove { background-color: #ffebee; color: #c62828; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+    .btn-add { background-color: #e3f2fd; color: #0d47a1; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 12px; font-weight: bold; }
+    .btn-save { background-color: #1a73e8; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 24px; font-weight: bold; }
+    .btn-save:hover { background-color: #1557b0; }
+    #status { margin-top: 12px; font-size: 13px; color: #388e3c; text-align: center; display: none; font-weight: bold; }
+    .help-text { font-size: 11px; color: #666; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <h2>⚙️ UNIPA Sync 設定</h2>
+  
+  <label for="gasUrl">Google Apps Script Webhook URL</label>
+  <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec" />
+  <div class="help-text">GASでデプロイしたURLを貼り付けてください。</div>
+
+  <label>カレンダー通知（最大5つまで）</label>
+  <div class="help-text">※0日前＝当日の意味です。</div>
+  <div id="remindersContainer"></div>
+  <button id="addReminderBtn" class="btn-add">＋ 通知を追加</button>
+
+  <button id="saveBtn" class="btn-save">設定を保存</button>
+  <div id="status">保存しました！</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
