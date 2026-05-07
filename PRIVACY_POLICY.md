@@ -3,7 +3,7 @@
 **Effective Date:** 2026/05/07
 
 ## 1. Information We Collect
-UNIPA Calendar Sync ("the Extension") extracts assignment data (course names, assignment titles, deadlines, and submission status) exclusively from the assignment list page of your university's academic system (UNIPA).
+UNIPA Assignment Sync ("the Extension") extracts assignment data (course names, assignment titles, deadlines, and submission status) exclusively from the assignment list page of your university's academic system (UNIPA).
 
 ## 2. How We Use Your Information
 The extracted data is used strictly for the single purpose of synchronizing your assignments with your Google Calendar and Google Sheets. The Extension does not collect, use, or store any personal information, browsing history, or passwords.

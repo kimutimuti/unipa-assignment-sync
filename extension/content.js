@@ -1,4 +1,4 @@
-console.log("UNIPA Calendar Sync loaded");
+console.log("UNIPA Assignment Sync loaded");
 
 // Safari互換: browser API or chrome API
 const extAPI = typeof browser !== "undefined" ? browser : chrome;
