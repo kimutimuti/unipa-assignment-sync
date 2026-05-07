@@ -1,4 +1,4 @@
-# UNIPA Calendar Sync
+# UNIPA Assignment Sync
 
 UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッドシートに同期するブラウザ拡張機能です。
 課題の追加・更新・削除を自動で検知し、出し忘れ（ブッチ）を防ぐための強力なダッシュボードを提供します。

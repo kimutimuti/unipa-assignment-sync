@@ -137,14 +137,14 @@ setTimeout(async () => {
           if (response?.success) {
             console.log("GAS Sync Result:", response.data);
             const { created = 0, deleted = 0, updated = 0, skipped = 0, url } = response.data;
-            const lines = ["✅ UNIPA Calendar Sync 完了"];
+            const lines = ["✅ UNIPA Assignment Sync 完了"];
             if (created > 0) lines.push(`📅 ${created} 件をカレンダーに追加`);
             if (deleted > 0) lines.push(`🗑️ ${deleted} 件を削除`);
             if (updated > 0) lines.push(`🔄 ${updated} 件を更新`);
             if (skipped > 0) lines.push(`⏭️ ${skipped} 件をスキップ`);
             if (url) lines.push(`\n👉 クリックしてスプレッドシートを開く`);
             
-            showToast(lines.length > 1 ? lines.join("\n") : "✅ UNIPA Calendar Sync 完了\n変更なし", false, url);
+            showToast(lines.length > 1 ? lines.join("\n") : "✅ UNIPA Assignment Sync 完了\n変更なし", false, url);
           } else {
             console.error("Sync failed:", response?.error);
             showToast(`❌ 同期失敗\n${response?.error || "不明なエラー"}`, true);

@@ -1,4 +1,4 @@
-# Privacy Policy for UNIPA Calendar Sync
+# Privacy Policy for UNIPA Assignment Sync
 
 **Effective Date:** 2026/05/07
 
