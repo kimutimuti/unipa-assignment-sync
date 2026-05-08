@@ -84,12 +84,6 @@ function setupSheetHeaders(sheet) {
   sheet.hideColumns(3);  // Event ID
 }
 
-function formatDeadlineDisplay(rawDeadline) {
-  // "2026/05/08(金) 23:59" → "05/08(金) 23:59"
-  const match = rawDeadline.match(/(\d{4})\/(\d{2}\/\d{2}\([^)]+\)\s*\d{2}:\d{2})/);
-  if (match) return match[2];
-  return rawDeadline;
-}
 
 function statusSortOrder(status) {
   // 提出受付中を最優先 (0)、それ以外は後ろ
@@ -158,13 +152,10 @@ function formatSheet(sheet) {
     statusCell.setFontWeight("bold");
   }
 
-  // 締切列: 表示用フォーマット MM/DD(曜日) HH:MM
-  for (let i = 2; i <= lastRow; i++) {
-    const cell = sheet.getRange(i, 6);
-    const raw = cell.getValue().toString();
-    cell.setValue(formatDeadlineDisplay(raw));
-  }
-  sheet.getRange(2, 6, lastRow - 1, 1).setHorizontalAlignment("center");
+  // 締切列: 書式設定 MM/dd(ddd) HH:mm
+  sheet.getRange(2, 6, lastRow - 1, 1)
+    .setNumberFormat("MM/dd(ddd) HH:mm")
+    .setHorizontalAlignment("center");
 
   // 最終同期列のフォーマット
   sheet.getRange(2, 8, lastRow - 1, 1)
@@ -205,18 +196,51 @@ function getOrCreateCalendar() {
 }
 
 function parseDateText(dateText) {
+  if (!dateText) return null;
+  
   // Format: 2026/05/08(金) 23:59
-  const match = dateText.match(/(\d{4})\/(\d{2})\/(\d{2}).*(\d{2}):(\d{2})/);
-  if (!match) return null;
-  const [, year, month, day, hour, minute] = match;
-  return new Date(
-    parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10),
-    parseInt(hour, 10), parseInt(minute, 10)
-  );
+  let match = dateText.match(/(\d{4})\/(\d{2})\/(\d{2}).*(\d{2}):(\d{2})/);
+  if (match) {
+    const [, year, month, day, hour, minute] = match;
+    return new Date(
+      parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10),
+      parseInt(hour, 10), parseInt(minute, 10)
+    );
+  }
+  
+  // Format: 05/08(金) 23:59 (年がない場合)
+  match = dateText.match(/(\d{2})\/(\d{2}).*(\d{2}):(\d{2})/);
+  if (match) {
+    const [, month, day, hour, minute] = match;
+    const now = new Date();
+    // 実行時の年を使用
+    return new Date(
+      now.getFullYear(), parseInt(month, 10) - 1, parseInt(day, 10),
+      parseInt(hour, 10), parseInt(minute, 10)
+    );
+  }
+  
+  return null;
+}
+
+/**
+ * 文字列や日付オブジェクトを安全にDateオブジェクトに変換する
+ */
+function tryParseDate(val) {
+  if (val instanceof Date) return val;
+  if (!val) return null;
+  const str = val.toString();
+  // 標準フォーマット (YYYY/MM/DD...)
+  const parsed = parseDateText(str);
+  if (parsed) return parsed;
+  // JSの標準解析（長い文字列形式 Fri May 08... などに対応）
+  const jsParsed = new Date(str);
+  if (!isNaN(jsParsed.getTime())) return jsParsed;
+  return null;
 }
 
 function createCalendarEvent(calendar, assignment, reminders) {
-  const dueDate = parseDateText(assignment.deadline);
+  const dueDate = tryParseDate(assignment.deadline);
   if (!dueDate) return null;
 
   const startDate = new Date(dueDate.getTime() - 60 * 60 * 1000); // 1時間前
@@ -301,16 +325,28 @@ function syncAssignments(assignments, reminders) {
       const existingData = sheet.getRange(rowNum, 1, 1, 8).getValues()[0];
       const eventId = existingData[2];
 
-      // ステータス、最終同期、未提出フラグを更新
+      // ステータス、締切、最終同期、未提出フラグを更新
+      const parsedDeadline = tryParseDate(deadline) || deadline;
+      sheet.getRange(rowNum, 6).setValue(parsedDeadline);
       sheet.getRange(rowNum, 7).setValue(status);
       sheet.getRange(rowNum, 8).setValue(now);
       sheet.getRange(rowNum, 2).setValue(isUnsubmitted ? "○" : "");
       updated++;
 
+      // 未完了なのにカレンダーIDがない場合 → 追加
+      if (!completed && !eventId) {
+        const assignmentForCal = { ...assignment, deadline: parsedDeadline };
+        eventId = createCalendarEvent(calendar, assignmentForCal, reminders);
+        if (eventId) {
+          sheet.getRange(rowNum, 3).setValue(eventId);
+          created++;
+        }
+      }
+
       // 完了済みでカレンダーイベントがある場合 → 削除
       if (completed && eventId) {
         deleteCalendarEvent(calendar, eventId);
-        sheet.getRange(rowNum, 6).setValue("");
+        sheet.getRange(rowNum, 3).setValue("");
         deleted++;
       }
     } else {
@@ -329,7 +365,7 @@ function syncAssignments(assignments, reminders) {
         eventId,
         groupName,
         assignmentName,
-        deadline,
+        tryParseDate(deadline) || deadline,
         status,
         now
       ]);
@@ -390,16 +426,21 @@ function updateDashboard(assignmentSheet) {
       courseStats[groupName] = { pending: 0, done: 0, missed: 0 };
     }
 
-    if (status.includes("提出受付中")) {
+    if (status.includes("(未)")) {
+      missed++;
+      if (groupName) courseStats[groupName].missed++;
+    } else if (isCompleted(status)) {
+      // 提出済、受付終了、公開終了など
+      submitted++;
+      if (groupName) courseStats[groupName].done++;
+    } else {
+      // 提出受付中、再提出受付中、一時保存など（未完了のすべて）
       pending++;
       if (groupName) courseStats[groupName].pending++;
 
-      // 締切解析（MM/DD(曜日) HH:MM 形式 — 年はないので今年と仮定）
-      const match = deadlineRaw.match(/(\d{2})\/(\d{2})\([^)]+\)\s*(\d{2}):(\d{2})/);
-      if (match) {
-        const [, m, d, h, min] = match;
-        const deadline = new Date(now.getFullYear(), parseInt(m, 10) - 1, parseInt(d, 10), parseInt(h, 10), parseInt(min, 10));
+      const deadline = tryParseDate(row[5]);
 
+      if (deadline instanceof Date) {
         // 24時間以内チェック
         const hoursLeft = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
         if (hoursLeft > 0 && hoursLeft <= 24) {
@@ -412,13 +453,6 @@ function updateDashboard(assignmentSheet) {
           nextAssignment = `${groupName ? groupName + " - " : ""}${assignmentName}`;
         }
       }
-    } else if (status.includes("(未)")) {
-      missed++;
-      if (groupName) courseStats[groupName].missed++;
-    } else if (status.includes("提出終了") || status.includes("受付終了") || status.includes("公開終了")) {
-      // 未提出フラグが立っていない、正当に完了した課題
-      submitted++;
-      if (groupName) courseStats[groupName].done++;
     }
   }
 
@@ -496,18 +530,29 @@ function updateDashboard(assignmentSheet) {
   }
 
   if (nextDeadline) {
-    const options = { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-    const deadlineStr = nextDeadline.toLocaleDateString("ja-JP", options);
-    urgentData.push(["📅 直近の締切", deadlineStr, nextAssignment]);
+    urgentData.push(["📅 直近の締切", nextDeadline, nextAssignment]);
   } else {
     urgentData.push(["📅 直近の締切", "なし", ""]);
   }
 
   for (let i = 0; i < urgentData.length; i++) {
     const row = urgentStart + 1 + i;
-    dashboard.getRange(row, 2).setValue(urgentData[i][0]);
-    dashboard.getRange(row, 3).setValue(urgentData[i][1]);
-    dashboard.getRange(row, 4).setValue(urgentData[i][2]);
+    const label = urgentData[i][0];
+    const val = urgentData[i][1];
+    const desc = urgentData[i][2];
+
+    dashboard.getRange(row, 2).setValue(label);
+    
+    const valueCell = dashboard.getRange(row, 3);
+    valueCell.clearFormat(); // 書式をリセット
+    valueCell.setValue(val);
+    
+    dashboard.getRange(row, 4).setValue(desc);
+
+    // 日付データなら書式を設定
+    if (val instanceof Date) {
+      valueCell.setNumberFormat("MM/dd(ddd) HH:mm");
+    }
   }
 
   dashboard.getRange(urgentStart + 1, 2, urgentData.length, 1)
@@ -575,15 +620,19 @@ function updateDashboard(assignmentSheet) {
   // --- 全体スタイル ---
   dashboard.setColumnWidth(1, 20);
   dashboard.setColumnWidth(2, 200);
-  dashboard.setColumnWidth(3, 100);
+  dashboard.setColumnWidth(3, 130);
   dashboard.setColumnWidth(4, 100);
   dashboard.setColumnWidth(5, 100);
   dashboard.setColumnWidth(6, 100);
 
   // 最終更新
   const footerRow = dashboard.getLastRow() + 2;
-  dashboard.getRange(footerRow, 2).setValue(`最終更新: ${now.toLocaleString("ja-JP")}`);
-  dashboard.getRange(footerRow, 2).setFontColor("#aaaaaa").setFontSize(9);
+  dashboard.getRange(footerRow, 2)
+    .clearFormat()
+    .setValue(now)
+    .setNumberFormat("\"最終更新: \"yyyy/MM/dd HH:mm")
+    .setFontColor("#aaaaaa")
+    .setFontSize(9);
 }
 
 // ===== 手動リセット =====
