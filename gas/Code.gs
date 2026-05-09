@@ -456,7 +456,7 @@ function updateDashboard(assignmentSheet) {
     }
   }
 
-  const totalRelevant = pending + submitted + missed; // 計算対象の全課題
+  const totalRelevant = pending + submitted; // 計算対象の全課題（未提出 + 提出済み）
   const submissionRate = totalRelevant > 0
     ? Math.round((submitted / totalRelevant) * 100)
     : 0;
@@ -589,7 +589,7 @@ function updateDashboard(assignmentSheet) {
       const row = courseHeaderRow + 1 + i;
       const name = courseNames[i];
       const cs = courseStats[name];
-      const total = cs.pending + cs.done + cs.missed;
+      const total = cs.pending + cs.done;
       const rate = total > 0 ? Math.round((cs.done / total) * 100) : 0;
 
       dashboard.getRange(row, 2).setValue(name || "(講義名なし)");
