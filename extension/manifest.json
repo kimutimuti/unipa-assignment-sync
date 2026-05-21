@@ -3,9 +3,7 @@
   "name": "UNIPA Assignment Sync",
   "version": "0.2.0",
   "permissions": [
-    "storage",
-    "activeTab",
-    "notifications"
+    "storage"
   ],
   "background": {
     "service_worker": "background.js"

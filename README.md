@@ -1,5 +1,7 @@
 # UNIPA Assignment Sync
 
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/fodipgpaenifggcjnbmnmkkljdkjecif?label=Chrome%20Web%20Store)](https://chromewebstore.google.com/detail/unipa-assignment-sync/fodipgpaenifggcjnbmnmkkljdkjecif?hl=ja)
+
 UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッドシートに同期するブラウザ拡張機能です。
 課題の追加・更新・削除を自動で検知し、出し忘れ（ブッチ）を防ぐための強力なダッシュボードを提供します。
 
@@ -30,16 +32,23 @@ UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッ
 6. 「承認が必要です」と出たら「アクセスを承認」し、自分のGoogleアカウントを選択して「Advanced（詳細）」から「UNIPA Sync（安全ではないページ）に移動」をクリックし、許可します。
 7. デプロイ完了画面で表示される **「ウェブアプリの URL (`https://script.google.com/macros/s/.../exec`)」** をコピーしてメモしておきます。
 
-### ステップ2: 拡張機能のインストール（Chromeの場合）
+### ステップ2: 拡張機能のインストール
 
+以下のいずれかの方法でインストールしてください。
+
+#### 推奨：Chrome ウェブストアからインストールする（簡単）
+1. **[Chrome ウェブストア](https://chromewebstore.google.com/detail/unipa-assignment-sync/fodipgpaenifggcjnbmnmkkljdkjecif?hl=ja)** から「Chrome に追加」をクリックしてインストールします。
+2. インストールされたら、Chromeの右上にある拡張機能アイコン（パズルマーク）から「UNIPA Assignment Sync」をピン留めします。
+3. 「UNIPA Assignment Sync」のアイコンをクリックして設定画面（ポップアップ）を開きます。
+4. ステップ1でコピーした **ウェブアプリの URL** を貼り付けます。
+5. カレンダーの通知（リマインド）を受け取るタイミングを自由に追加し、**「設定を保存」** をクリックします。
+
+#### 手動インストール（開発者向け）
 1. このリポジトリの `extension` フォルダを自分のパソコンにダウンロードします（右上の「Code」>「Download ZIP」からダウンロードし、解凍します）。
 2. Chromeブラウザで `chrome://extensions/` を開きます。
 3. 画面右上の **「デベロッパーモード」** をオンにします。
 4. 画面左上の **「パッケージ化されていない拡張機能を読み込む」** をクリックし、先ほど解凍した中にある `extension` フォルダを選択します。
-5. インストールされたら、Chromeの右上にある拡張機能アイコン（パズルマーク）から「UNIPA Assignment Sync」をピン留めします。
-6. 「UNIPA Assignment Sync」のアイコンをクリックして設定画面（ポップアップ）を開きます。
-7. ステップ1でコピーした **ウェブアプリの URL** を貼り付けます。
-8. カレンダーの通知（リマインド）を受け取るタイミングを自由に追加し、**「設定を保存」** をクリックします。
+5. あとは上記のウェブストア版の手順2〜5と同様に設定を行います。
 
 ---
 
