@@ -1,12 +1,13 @@
 console.log("UNIPA Assignment Sync loaded");
 
-// Safari互換: browser API or chrome API
 const extAPI = typeof browser !== "undefined" ? browser : chrome;
 
+// 1. 課題ページかどうかの判定（非描画のバックグラウンド対応）
 function isAssignmentPage() {
-  return document.body.innerText.includes("課題一覧");
+  return document.body.textContent.includes("課題一覧");
 }
 
+// 2. 課題IDの生成
 async function generateId(message) {
   if (window.crypto && window.crypto.subtle) {
     const msgBuffer = new TextEncoder().encode(message);
@@ -14,7 +15,6 @@ async function generateId(message) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   } else {
-    // Simple hash for non-secure contexts
     let hash = 0;
     for (let i = 0; i < message.length; i++) {
       const char = message.charCodeAt(i);
@@ -25,11 +25,11 @@ async function generateId(message) {
   }
 }
 
+// 3. 課題の抽出処理（非描画のバックグラウンド対応のため textContent に完全置換）
 async function extractAssignments() {
   const assignments = [];
   const rows = document.querySelectorAll("tbody tr");
 
-  // ページヘッダーの .cpTgtName から講義名を取得（テキストノードのみ）
   const cpTgtName = document.querySelector(".cpTgtName");
   let rawGroupName = "";
   if (cpTgtName) {
@@ -39,27 +39,21 @@ async function extractAssignments() {
       }
     });
   }
-  // コード部分（例: ST3039sp, ST3047spA）を除去
   const groupName = rawGroupName.replace(/^[A-Z]{1,4}\d{3,5}[a-zA-Z]*/g, "").trim();
   console.log("講義名:", groupName);
-
-  // UNIPAテーブル構造 (21列):
-  // [0] 課題グループ名  [1] 課題名  [2] コース  [3] 目次
-  // [4] 提出開始日時  [5] 提出終了日時(=締切)  [6] 提出方法
-  // [7] ステータス  ...
 
   for (const row of rows) {
     const cells = row.querySelectorAll("td");
     if (cells.length < 8) continue;
 
-    const assignmentName = cells[1]?.innerText?.trim() || "";
-    const deadline = cells[5]?.innerText?.trim() || "";   // 課題提出終了日時
-    const status = cells[7]?.innerText?.trim() || "";      // ステータス
-    const isUnsubmitted = cells[8]?.innerText?.trim() === "○"; // 未提出フラグ
+    // innerText ではなく textContent を使用して非表示状態でも文字を取得する
+    const assignmentName = cells[1]?.textContent?.trim() || "";
+    const deadline = cells[5]?.textContent?.trim() || "";
+    const status = cells[7]?.textContent?.trim() || "";
+    const isUnsubmitted = cells[8]?.textContent?.trim() === "○";
 
     if (!assignmentName || !deadline) continue;
 
-    // assignmentId: 授業名 + 課題名 + 締切
     const rawId = `${groupName}${assignmentName}${deadline}`;
     const assignmentId = await generateId(rawId);
 
@@ -76,6 +70,7 @@ async function extractAssignments() {
   return assignments;
 }
 
+// 4. トースト通知の表示
 function showToast(message, isError = false, url = null) {
   const toast = document.createElement("div");
   toast.innerText = message;
@@ -86,7 +81,6 @@ function showToast(message, isError = false, url = null) {
       window.open(url, "_blank");
       toast.remove();
     };
-    // ホバー時に少し暗くする効果（簡易的）
     toast.onmouseenter = () => toast.style.filter = "brightness(0.9)";
     toast.onmouseleave = () => toast.style.filter = "brightness(1)";
   }
@@ -109,13 +103,11 @@ function showToast(message, isError = false, url = null) {
 
   document.body.appendChild(toast);
 
-  // フェードイン
   setTimeout(() => {
     toast.style.opacity = "1";
     toast.style.transform = "translateY(0)";
   }, 10);
 
-  // 5秒後にフェードアウト
   setTimeout(() => {
     toast.style.opacity = "0";
     toast.style.transform = "translateY(20px)";
@@ -123,34 +115,57 @@ function showToast(message, isError = false, url = null) {
   }, 5000);
 }
 
-setTimeout(async () => {
-  if (isAssignmentPage()) {
-    console.log("課題一覧ページを検出");
+// 5. 画面監視と同期の発火（2秒ごと）
+let lastSyncedSubject = "";
 
-    const assignments = await extractAssignments();
-    console.log("抽出された課題:", assignments);
+setInterval(async () => {
+  if (!isAssignmentPage()) {
+    lastSyncedSubject = "";
+    return;
+  }
 
-    if (assignments.length > 0) {
-      extAPI.runtime.sendMessage(
-        { type: "SYNC_ASSIGNMENTS", payload: assignments },
-        (response) => {
-          if (response?.success) {
-            console.log("GAS Sync Result:", response.data);
-            const { created = 0, deleted = 0, updated = 0, skipped = 0, url } = response.data;
-            const lines = ["✅ UNIPA Assignment Sync 完了"];
-            if (created > 0) lines.push(`📅 ${created} 件をカレンダーに追加`);
-            if (deleted > 0) lines.push(`🗑️ ${deleted} 件を削除`);
-            if (updated > 0) lines.push(`🔄 ${updated} 件を更新`);
-            if (skipped > 0) lines.push(`⏭️ ${skipped} 件をスキップ`);
-            if (url) lines.push(`\n👉 クリックしてスプレッドシートを開く`);
-            
-            showToast(lines.length > 1 ? lines.join("\n") : "✅ UNIPA Assignment Sync 完了\n変更なし", false, url);
-          } else {
-            console.error("Sync failed:", response?.error);
-            showToast(`❌ 同期失敗\n${response?.error || "不明なエラー"}`, true);
+  const cpTgtName = document.querySelector(".cpTgtName");
+  let rawGroupName = "";
+  if (cpTgtName) {
+    cpTgtName.childNodes.forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        rawGroupName += node.textContent;
+      }
+    });
+  }
+  const groupName = rawGroupName.replace(/^[A-Z]{1,4}\d{3,5}[a-zA-Z]*/g, "").trim();
+
+  if (groupName && groupName !== lastSyncedSubject) {
+    lastSyncedSubject = groupName;
+    console.log("課題一覧ページを検出:", groupName);
+
+    try {
+      const assignments = await extractAssignments();
+      console.log("抽出された課題:", assignments);
+
+      if (assignments.length > 0) {
+        extAPI.runtime.sendMessage(
+          { type: "SYNC_ASSIGNMENTS", payload: assignments },
+          (response) => {
+            if (response?.success) {
+              console.log("GAS Sync Result:", response.data);
+              const { created = 0, deleted = 0, updated = 0, skipped = 0, url } = response.data;
+              const lines = ["✅ UNIPA Assignment Sync 完了"];
+              if (created > 0) lines.push(`📅 ${created} 件を追加`);
+              if (deleted > 0) lines.push(`🗑️ ${deleted} 件を削除`);
+              if (updated > 0) lines.push(`🔄 ${updated} 件を更新`);
+              if (url) lines.push(`\n👉 クリックして開く`);
+              
+              showToast(lines.length > 1 ? lines.join("\n") : "✅ UNIPA Sync 完了\n変更なし", false, url);
+            } else {
+              console.error("Sync failed:", response?.error);
+              showToast(`❌ 同期失敗\n${response?.error || "不明なエラー"}`, true);
+            }
           }
-        }
-      );
+        );
+      }
+    } catch (error) {
+      console.error("Extraction error:", error);
     }
   }
-}, 3000);
+}, 2000);
