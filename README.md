@@ -45,13 +45,19 @@ UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッ
 #### ステップ2.5: chromeプロファイルの用意
 
 1. このリポジトリの `extension` フォルダを自分のパソコンにダウンロードします（右上の「Code」>「Download ZIP」からダウンロードし、解凍します）。
-2. chromeに自分の私用のプロファイルなどでログインし、[chrome://virsion/](chrome://virsion/)に跳んで"プロフィールパス"と書かれた欄のパスを確認します。
-3. 上記のパスに跳び、内部にあるすべてを選択して先ほど解凍した中にある
+2. 先ほど解凍したzipファイルの中にある、`UNIPA_synk`フォルダを任意の箇所に配置します。
+3. chromeに自分の私用のプロファイルなどでログインし、[chrome://virsion/](chrome://virsion/)に跳んで**「プロフィールパス」**と書かれた欄のパスを確認します。
+4. 上記のパスに跳び、内部にあるすべてを選択して先ほど解凍した中にある`UNIPA_synk`フォルダ傘下の`AutoChromeData`フォルダ内に張り付けます。
+   > このコピーにより1GB以上の容量を喰いますが、これによりバックグラウンドで実行中にもchromeを使えます。
 
 ### ステップ2: 拡張機能のインストール
 
-1. 
-2. Chromeブラウザで `chrome://extensions/` を開きます。
+1. コマンドプロンプト（以下CMD）を立ち上げ、以下のコマンドを打ち込みます。
+```cmd
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="YOUR_PATH\UNIPA_synk\AutoChromeData"
+```
+> `YOUR_PATH`部分を`UNIPA_synk`フォルダを置いている場所のフルパスにしてください。
+2. 立ち上がったChromeブラウザで `chrome://extensions/` を開きます。
 3. 画面右上の **「デベロッパーモード」** をオンにします。
 4. 画面左上の **「パッケージ化されていない拡張機能を読み込む」** をクリックし、先ほど解凍した中にある `extension` フォルダを選択します。
 5. インストールされたら、Chromeの右上にある拡張機能アイコン（パズルマーク）から「UNIPA Assignment Sync」をピン留めします。
@@ -65,9 +71,9 @@ UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッ
 1. [https://github.com/coreybutler/nvm-windows/releases/latest](https://github.com/coreybutler/nvm-windows/releases/latest)から`setup.exe`をダウンロードします。
 2. `nvm-setup.exe`を実行しnvmをインストールします。
 3. お好みのターミナル（ここではPowershellを想定します）を立ち上げ、`nvm install latest`でNode.jsとnpmをインストールします。
-   > すでにインストールされている場合は`npm update`を行う。
+   > すでにインストールされている場合は`npm update`を行います。
 4. ターミナルを再起動し、以下のコマンドを打ち込みます。
-```PowerShell
+```powershell
 npm install -g selenium-side-runner
 npm install -g --allow-scripts=chromedriver chromedriver
 ```
@@ -76,8 +82,59 @@ npm install -g --allow-scripts=chromedriver chromedriver
 
 ### ステップ4: sideファイルの用意
 
-1. 先ほど解凍したzipファイルの中にある、`UNIPA_synk`フォルダを任意の箇所に配置します。
-2. 
+1. 先ほど解凍した中にある`UNIPA_Auto`フォルダ内の`unipa-synk.side`をダブルクリックして実行します。
+2. 立ち上がったselenium IDEから「LOAD PROJECT」をクリックし、`unipa-synk.side`を読み込みます。
+3. あとは内部のコメントに従って`value`を変更したり追加で`record`してください。
+   > 以下AIコピペ  
+   > **自動化スクリプトの作成に関する注意点**  
+   > 録画（Record）が完了したら、安定して動作させるためにSelenium IDE上で以下のコマンドを手動で追加してください。
+   > 
+   > 1. 読み込み待機（pause）の追加:  
+   > 課題ページをクリックした直後には、必ず Command: pause, Target: 7000（7秒待機）を追加してください。これを入れないと、非表示状態での画面読み込みが完了する前に次の動作に進んでしまい、エラーで停止します。
+   > 
+   > 2. 曜日判定の追加:  
+   > 毎日すべての曜日のページを開くと時間がかかりすぎるため、当日の授業だけを開くように if 文を追加します。  
+   >    - 各曜日の動作の直前に Command: if, Target: ${todayNum} === 1 （月曜の場合）を追加し、その曜日の動作の終わりに Command: end を追加して囲んでください。（火曜は2、水曜は3...と設定します）
+   > 
+   > 例：  
+   > ```JSON
+   >{
+   >      "command": "if",
+   >      "target": "${todayNum} === 1",
+   >      "value": "",
+   >      "comment": "月曜日（1）の場合のみ以下の処理を実行"
+   >    },
+   >    {
+   >      "command": "comment",
+   >      "target": "",
+   >      "value": "▼ ここに月曜日のパネルを開く操作を録画 ▼"
+   >    },
+   >    {
+   >      "command": "end",
+   >      "target": "",
+   >      "value": "",
+   >      "comment": "月曜日の if 文の終了"
+   >    },
+   >    {
+   >      "command": "comment"
+   >      "target": "",
+   >      "value": "週最初の授業の場合課題提出ページへの遷移を録画"
+   >    },
+   >    {
+   >      "command": "comment",
+   >      "target": "",
+   >      "value": "▼ 各授業のクリック操作を録画 ▼"
+   >    },
+   >    {
+   >      "command": "pause",
+   >      "target": "7000",
+   >      "value": "",
+   >      "comment": "【重要】授業をクリックした直後には、必ずこの pause (7000ミリ秒) を挿入してください。"
+   >    },
+   > ```
+
+### ステップ5:  
+
 
 ---
 
