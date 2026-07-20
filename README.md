@@ -24,7 +24,7 @@ UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッ
 
 ## 導入手順（セットアップ）
 
-このツールを使うためには、**「1. Googleスプレッドシートの準備」** と **「2. 拡張機能のインストール」** の2ステップが必要です。
+このツールを使うためには、**「1. Googleスプレッドシートの準備」** と **「2. 拡張機能のインストール」** の2ステップの他、3ステップほど必要です。
 
 ### ステップ1: Google Apps Script (GAS) の設定
 
@@ -41,6 +41,10 @@ UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッ
 6. 「承認が必要です」と出たら「アクセスを承認」し、自分のGoogleアカウントを選択して「Advanced（詳細）」から「UNIPA Sync（安全ではないページ）に移動」をクリックし、許可します。
 7. デプロイ完了画面で表示される **「ウェブアプリの URL (`https://script.google.com/macros/s/.../exec`)」** をコピーしてメモしておきます。
 
+
+#### ステップ2.5: chromeプロファイルの用意
+1. chromeに自分の私用のプロファイルなどでログインし、[chrome://virsion/](chrome://virsion/)
+
 ### ステップ2: 拡張機能のインストール
 
 1. このリポジトリの `extension` フォルダを自分のパソコンにダウンロードします（右上の「Code」>「Download ZIP」からダウンロードし、解凍します）。
@@ -54,9 +58,9 @@ UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッ
 8. カレンダーの通知（リマインド）を受け取るタイミングを自由に追加し、**「設定を保存」** をクリックします。
 
 
-### ステップ3: selenium-side-runnerの用意
+### ステップ3: selenium環境の用意
 
-1. [https://github.com/coreybutler/nvm-windows/releases/latest](https://github.com/coreybutler/nvm-windows/releases/latest)から最新のnvmをインストールします。
+1. [https://github.com/coreybutler/nvm-windows/releases/latest](https://github.com/coreybutler/nvm-windows/releases/latest)から`setup.exe`をダウンロードします。
 2. `nvm-setup.exe`を実行しnvmをインストールします。
 3. お好みのターミナル（ここではPowershellを想定します）を立ち上げ、`nvm install latest`でNode.jsとnpmをインストールします。
    > すでにインストールされている場合は`npm update`を行う。
@@ -65,7 +69,13 @@ UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッ
 npm install -g selenium-side-runner
 npm install -g --allow-scripts=chromedriver chromedriver
 ```
-5. 
+5. [https://github.com/SeleniumHQ/selenium-ide/releases/latest](https://github.com/SeleniumHQ/selenium-ide/releases/latest)から`setup.exe`をダウンロードします。
+6. ダウンロードした`setup.exe`からselenium IDEv4をインストールします。
+
+### ステップ4: sideファイルの用意
+
+1. 先ほど解凍したzipファイルの中にある、`UNIPA_synk`フォルダを任意の箇所に配置します。
+2. 
 
 ---
 
