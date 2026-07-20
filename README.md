@@ -6,7 +6,6 @@
 
 # UNIPA Assignment Sync
 
-[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/fodipgpaenifggcjnbmnmkkljdkjecif?label=Chrome%20Web%20Store)](https://chromewebstore.google.com/detail/unipa-assignment-sync/fodipgpaenifggcjnbmnmkkljdkjecif?hl=ja)
 
 UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッドシートに同期するブラウザ拡張機能です。
 課題の追加・更新・削除を自動で検知し、出し忘れ（ブッチ）を防ぐための強力なダッシュボードを提供します。
@@ -44,21 +43,29 @@ UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッ
 
 ### ステップ2: 拡張機能のインストール
 
-以下のいずれかの方法でインストールしてください。
-
-#### 推奨：Chrome ウェブストアからインストールする（簡単）
-1. **[Chrome ウェブストア](https://chromewebstore.google.com/detail/unipa-assignment-sync/fodipgpaenifggcjnbmnmkkljdkjecif?hl=ja)** から「Chrome に追加」をクリックしてインストールします。
-2. インストールされたら、Chromeの右上にある拡張機能アイコン（パズルマーク）から「UNIPA Assignment Sync」をピン留めします。
-3. 「UNIPA Assignment Sync」のアイコンをクリックして設定画面（ポップアップ）を開きます。
-4. ステップ1でコピーした **ウェブアプリの URL** を貼り付けます。
-5. カレンダーの通知（リマインド）を受け取るタイミングを自由に追加し、**「設定を保存」** をクリックします。
-
-#### 手動インストール（開発者向け）
 1. このリポジトリの `extension` フォルダを自分のパソコンにダウンロードします（右上の「Code」>「Download ZIP」からダウンロードし、解凍します）。
 2. Chromeブラウザで `chrome://extensions/` を開きます。
 3. 画面右上の **「デベロッパーモード」** をオンにします。
 4. 画面左上の **「パッケージ化されていない拡張機能を読み込む」** をクリックし、先ほど解凍した中にある `extension` フォルダを選択します。
-5. あとは上記のウェブストア版の手順2〜5と同様に設定を行います。
+
+5. インストールされたら、Chromeの右上にある拡張機能アイコン（パズルマーク）から「UNIPA Assignment Sync」をピン留めします。
+6. 「UNIPA Assignment Sync」のアイコンをクリックして設定画面（ポップアップ）を開きます。
+7. ステップ1でコピーした **ウェブアプリの URL** を貼り付けます。
+8. カレンダーの通知（リマインド）を受け取るタイミングを自由に追加し、**「設定を保存」** をクリックします。
+
+
+### ステップ3: selenium-side-runnerの用意
+
+1. [https://github.com/coreybutler/nvm-windows/releases/latest](https://github.com/coreybutler/nvm-windows/releases/latest)から最新のnvmをインストールします。
+2. `nvm-setup.exe`を実行しnvmをインストールします。
+3. お好みのターミナル（ここではPowershellを想定します）を立ち上げ、`nvm install latest`でNode.jsとnpmをインストールします。
+   > すでにインストールされている場合は`npm update`を行う。
+4. ターミナルを再起動し、以下のコマンドを打ち込みます。
+```PowerShell
+npm install -g selenium-side-runner
+npm install -g --allow-scripts=chromedriver chromedriver
+```
+5. 
 
 ---
 
