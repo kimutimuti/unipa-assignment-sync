@@ -1,3 +1,9 @@
+## 注意
+このリポジトリは「UNIPA Assignment Sync」をバックグラウンドで稼働できるようにしたフォークです。主に自動化して処理する為の改変が施されています。
+自分用に作ったものを適当に汎用化しているだけで、安全性については考慮しておりませんので悪しからず。
+
+- また改変にAIを結構使っているので、ご使用の際はそれを了承してお使いください。
+
 # UNIPA Assignment Sync
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/fodipgpaenifggcjnbmnmkkljdkjecif?label=Chrome%20Web%20Store)](https://chromewebstore.google.com/detail/unipa-assignment-sync/fodipgpaenifggcjnbmnmkkljdkjecif?hl=ja)
@@ -10,6 +16,10 @@ UNIPAの課題を自動で抽出し、GoogleカレンダーとGoogleスプレッ
 - **カレンダー連携**: Googleカレンダーに課題を自動登録し、自由に設定したタイミングでスマホにプッシュ通知（リマインド）を送れます。
 - **ダッシュボード**: スプレッドシート上で「提出受付中」「提出済み」「締切後未提出」などの進捗状況をグラフや色分けで分かりやすく可視化します。
 - **未提出フラグ対応**: すでに受付終了している課題でも、「未提出」のまま終わった課題を正確にカウントします。
+
+## このフォークの変更点
+- **非描画時の文字の読み取り**: バックグラウンドで作動させるため、非描画時でも文字の抽出ができるようにした。
+- **自動化用スクリプトの追加**: 自動化に使用する為のbatファイル（タスクスケジューラ用）とsideファイル（selenium-side-runner用）を追加した。
 
 ---
 
