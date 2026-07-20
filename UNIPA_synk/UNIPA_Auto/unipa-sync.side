@@ -1,0 +1,73 @@
+{
+  "id": "e3a660af-ebad-470b-af42-7534b788b0ea",
+  "version": "3.0",
+  "name": "New Project",
+  "url": "http://www.google.com",
+  "urls": [
+    "http://www.google.com"
+  ],
+  "plugins": [],
+  "suites": [
+    {
+      "id": "8b4edafd-4ca7-46ab-b38e-27b10014a515",
+      "name": "New Suite",
+      "parallel": false,
+      "persistSession": false,
+      "tests": [
+        "3268df1f-6fe6-4189-a0e8-f4535b7f9dc9"
+      ],
+      "timeout": 600000
+    }
+  ],
+  "tests": [
+    {
+      "id": "3268df1f-6fe6-4189-a0e8-f4535b7f9dc9",
+      "name": "UNIPA_Sync_Template",
+      "commands": [
+        {
+          "command": "open",
+          "target": "",
+          "value": "",
+          "comment": "※1. UNIPAのURL（IDEで入力）"
+        },
+        {
+          "command": "type",
+          "target": "id=loginForm:userId",
+          "value": "YOUR_ID_HERE",
+          "comment": "※2. ID（IDEで入力）"
+        },
+        {
+          "command": "type",
+          "target": "id=loginForm:password",
+          "value": "YOUR_PASSWORD_HERE",
+          "comment": "※3. パスワード（IDEで入力）"
+        },
+        {
+          "command": "click",
+          "target": "css=.ui-button-text",
+          "value": "",
+          "comment": "※4. ログインボタンをクリック（IDが異なる場合はRecordで上書きしてください）"
+        },
+		{
+          "command": "executeScript",
+          "target": "return new Date().getDay();",
+          "value": "todayNum",
+          "comment": "日曜が0、土曜を6とし、実行時の曜日を取得してその日のパネルを開く動作をスキップする。"
+        },
+        {
+          "command": "comment",
+          "target": "",
+          "value": "ここから下の行を選択し、Selenium IDEの『REC』ボタンを押して、クラスプロファイル〜各曜日の課題画面を開く操作をご自身で録画してください。"
+        }
+      ]
+    }
+  ],
+  "snapshot": {
+    "dependencies": {},
+    "tests": [],
+    "jest": {
+      "extraGlobals": []
+    }
+  },
+  "timeout": 600000
+}
